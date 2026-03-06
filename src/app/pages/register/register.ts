@@ -1,11 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { Button } from '../../shared/components/button';
 import { RouterLink } from '@angular/router';
-import { form, required, validate } from '@angular/forms/signals';
+import { form, required, validate, FormField, minLength } from '@angular/forms/signals';
+import { FormErrors } from '../../shared/components/form-errors';
+import { registerSchema } from './register-schema';
 
 @Component({
   selector: 'app-register',
-  imports: [Button, RouterLink],
+  imports: [Button, RouterLink, FormField, FormErrors],
   template: `
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="p-8">
@@ -18,40 +20,57 @@ import { form, required, validate } from '@angular/forms/signals';
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
             <input
+              [formField]="registerForm.username"
               type="text"
               placeholder="Choose a username"
               class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            <app-form-errors [control]="registerForm.username()" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
             <input
+              [formField]="registerForm.email"
               type="email"
               placeholder="Enter your email"
               class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            <app-form-errors [control]="registerForm.email()" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
             <input
+              [formField]="registerForm.password"
               type="password"
               placeholder="••••••••"
               class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            <app-form-errors [control]="registerForm.password()" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
             <input
+              [formField]="registerForm.confirmPassword"
               type="password"
               placeholder="••••••••"
               class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            <app-form-errors [control]="registerForm.confirmPassword()" />
           </div>
 
-          <button size="lg" appButton type="button" class="w-full !mt-6">Register</button>
+          <button
+            size="lg"
+            appButton
+            type="button"
+            class="w-full !mt-6"
+            (click)="register()"
+            [disabled]="registerForm().invalid()"
+          >
+            Register
+          </button>
         </form>
       </div>
 
@@ -79,10 +98,13 @@ export class Register {
     confirmPassword: '',
   });
 
-  registerForm = form(this.registerModel, (rootpath) => {
-    required(rootpath.username, { message: 'Username is required' });
-    required(rootpath.email, { message: 'Email is required' });
-    required(rootpath.password, { message: 'Password is required' });
-    required(rootpath.confirmPassword, { message: 'Confirm Password is required' });
-  });
+  registerForm = form(this.registerModel, registerSchema);
+
+  register() {
+    if (this.registerForm().valid()) {
+      console.log(this.registerForm().value());
+    } else {
+      console.log('Invalid form');
+    }
+  }
 }
